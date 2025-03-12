@@ -13,7 +13,7 @@ SELECT title
 FROM film
 GROUP BY title; -- 1000 rows
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 2. muestra los nombres de todas las películas que tengan una clasificación de "PG-13"
 -- solución:
 SELECT title
@@ -26,14 +26,14 @@ FROM film
 GROUP BY rating; -- comprobamos que PG-13 son 223 registros
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 3. Encuentra el título y la descripción de todas las películas que contengan la palabra "amazing" en su descripción
 SELECT title, description
 FROM film
 WHERE description LIKE '%amazing%';
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 4. Encuentra el título de todas las películas que tengan una duración mayor a 120 minutos
 /* nota Sandra: Entendemos que la columna "length" es "duración". La columna viene expresada en minutos y 
 es de tipo UNSIGNED (que impide negativos)*/
@@ -42,41 +42,41 @@ FROM film
 WHERE length > 120;
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 5. Recupera los nombres de todos los actores
 SELECT first_name, last_name
 FROM actor;  
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 6. Encuentra el nombre y apellido de los actores que tengan "Gibson" en su apellido
 SELECT first_name, last_name
 FROM actor
 WHERE last_name LIKE '%Gibson%';
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 7. Encuentra los nombres de los actores que tengan un actor_id entre 10 y 20
 SELECT first_name, last_name
 FROM actor
 WHERE actor_id BETWEEN 10 AND 20;
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 8. Encuentra el título de las películas en la tabla `film` que no sean ni "R" ni "PG-13" en cuanto a su clasificación
 SELECT title
 FROM film
 WHERE NOT rating = 'R' AND NOT rating = "PG-13";
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 9. Encuentra la cantidad total de películas en cada clasificación de la tabla `film` y muestra la clasificación junto con el recuento
 SELECT rating, COUNT(rating)
 FROM film
 GROUP BY rating; -- > comprobación: La suma de todos los count = 1000. Es correcto porque 1000 = numero de registros total de la tabla film.
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 10. Encuentra la cantidad total de películas alquiladas por cada cliente y muestra el ID del cliente, su nombre y 
 -- apellido junto con la cantidad de películas alquiladas
 /*----------------------------
@@ -111,7 +111,7 @@ GROUP BY c.customer_id, c.first_name, c.last_name
 ORDER BY c.customer_id; -- comprobación: nos devuelve 599 registros, que es el total de num clientes
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 11. Encuentra la cantidad total de películas alquiladas por categoría y muestra el nombre de la categoría junto con el 
 -- recuento de alquileres
 /*----------------------------
@@ -144,7 +144,7 @@ GROUP BY  c.name;
 -- > comprobación: 16.044 rows antes de agrupar (= num de rental_id) y 16 rows tras la argupación (= num categorías)
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 12. Encuentra el promedio de duración de las peliculas para cada clasificación de la tabla film y muestra la clasificación 
 -- junto con el promedio de duración
 /*----------------------------
@@ -171,7 +171,7 @@ SELECT c.name, ROUND(AVG(f.length),2) AS promedio_duracion_in_min
 GROUP BY c.category_id, c.name;
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 13. Encuentra el nombre y apellido de los actores que aparecen en la película con title "Indian Love"
 /*----------------------------
 Solución pregunta 13:
@@ -195,14 +195,14 @@ SELECT actor_id
 FROM film_actor
 WHERE film_id = '458'; -- 10 rows 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 14. Muestra el título de todas las películas que contengan la palabra "dog" o "cat" en su descripción
 SELECT title, description
 FROM film
 WHERE description LIKE '%dog%' OR 
 		description LIKE '%cat%'; -- 167 rows
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 15. Hay algún actor o actriz que no aparezca en ninguna película de la tabla film_actor?
 /*----------------------------
 sucio pregunta 15:
@@ -224,14 +224,14 @@ SELECT a.first_name, a.last_name
 				FROM film_actor AS fa); -- lista de IDs de actores dentro de la tabla film_actor
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 16. Encuentra el título de todas las películas que fueron lanzadas entre el año 2005 y 2010.
 SELECT title, release_year
 FROM film
 WHERE release_year BETWEEN 2005 AND 2010; -- Parece que todas las pelis fueron lanzadas en 2006
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 17. Encuentra el titulo de todas las películas que son de la misma categoría que "Family"
 /* ---------------------
 sucio ejercicio 17:
@@ -259,7 +259,7 @@ WHERE film_id IN (SELECT film_id
 											WHERE name = 'Family'));
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 18. Muestra el nombre y apellido de los actores que aparecen en más de 10 películas
 /* ---------------------
 sucio ejercicio 18:
@@ -290,16 +290,18 @@ WHERE actor_id IN (SELECT actor_id
 					FROM film_actor
 					GROUP BY actor_id
 					HAVING COUNT(film_id) > 10);
+                    
+-- NOTA: actor_id Susan Davis: 101 y 110. Entendemos que son dos personas diferentes porque cada una tiene sus películas
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 19. Encuentra el título de todas las películas que son "R" y tienen una duración mayor a 2 horas en la tabla film
 SELECT title
 FROM film
 WHERE rating = 'R' AND length > 120;
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 20. Encuentra las categorías de películas que tienen un promedio de duración superior a 120 min y muestra
 -- el nombre de la categoría junto con el promedio de duración.
 SELECT c.name AS nombre_categoria, ROUND(AVG(f.length),2) AS promedio_duracion
@@ -312,19 +314,23 @@ GROUP BY c.category_id, c.name
 HAVING AVG(f.length) > 120;
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 21. Encuentra los actores que han actuado en al menos 5 películas y muestra el nombre del actor junto con la cantidad 
 -- de películas en las que han actuado.
 SELECT  COUNT(fa.film_id) AS cantidad_pelis, CONCAT(a.first_name, ' ', a.last_name) AS nombre_actor
 FROM actor AS a
 INNER JOIN film_actor AS fa
 USING(actor_id)
-GROUP BY  nombre_actor
+GROUP BY  a.actor_id
 HAVING COUNT(film_id) >= 5
-ORDER BY cantidad_pelis DESC; -- 199 rows, Susan Davis tiene dos ids diferentes: 101 y 110
+ORDER BY cantidad_pelis DESC; -- 200 rows, 
+
+/* NOTA: actor_id Susan Davis: 101 y 110. Entendemos que son dos personas diferentes porque cada una tiene sus películas.
+Por eso agrupo por actor_id y no por CONCAT(a.first_name, ' ', a.last_name) AS nombre_actor , porque si no me cuenta 
+las pelis de las dos Susan Davis en la misma fila*/
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 22. Encuentra el título de todas las películas que fueron alquiladas por más de 5 días. Utiliza una subconsulta para 
 -- encontrar los reltal_ids con una duracion superior a 5 días y luego selecciona las películas correspondientes.
 /* ---------------------
@@ -366,7 +372,7 @@ WHERE rental_id IN (SELECT  rental_id
 					WHERE (DATE(return_date) - DATE(rental_date)) > 5); -- 958 pelis en esa situacion (están agrupadas)
 
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 23. Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría "horror". 
 -- Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego 
 -- exclúyelos de la lista de actores.
@@ -412,7 +418,7 @@ WHERE actor_id NOT IN (SELECT actor_id
 					WHERE c.name = 'horror'
                     GROUP BY actor_id); -- 44 rows // comprobación: total artist_id = 200// 200-44 = 156
 
--- ****************************************************************************************************************
+-- **********************************************************************************************************************************
 -- 24. Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 min en la tabla film.
 /* ---------------------
 sucio ejercicio 24:
@@ -437,4 +443,51 @@ SELECT f.title, c.name, f.length
 	USING(category_id)
 WHERE c.name = 'comedy'
 		AND f.length > 180;
+
+
+-- **********************************************************************************************************************************
+-- 25.Encuentra todos los actores que han actuado juntos en al menos una película. La consulta debe mostrar el nombre 
+-- y apellido de los actores y el número de películas en las que han actuado juntos
+/* ---------------------
+sucio ejercicio 25:
+----------------------*/
+
+-- 1. Tabla de todos los actores que tienen en común una peli con otro actor:
+WITH actor1 AS (SELECT a1.actor_id AS actor_id, a1.first_name, a1.last_name, f1.film_id AS film_id
+					FROM actor AS a1
+					INNER JOIN film_actor  AS f1
+					USING(actor_id)), -- > para poner varias CTEs una detrás de otra, hay que poner una coma entre las CTEs
+
+	actor2 AS (SELECT a2.actor_id AS actor_id, a2.first_name, a2.last_name, f2.film_id AS film_id
+					FROM actor AS a2
+					INNER JOIN film_actor  AS f2
+					USING(actor_id)) -- > OJO! aquí no hay coma porque se acaban los WITH
+
+SELECT actor1.actor_id AS actor_1, 
+		actor1.film_id AS peli_id,
+        actor2.actor_id AS actor_2
+	FROM actor1 
+	INNER JOIN actor2
+	USING(film_id)
+WHERE actor1.actor_id <> actor2.actor_id;
+-- -----------------------------------------------------
+-- 2. Con la misma tabla del punto (1), cuento el num de pelis que han hecho juntos un actor y otro:
+WITH actor1 AS (SELECT a1.actor_id AS actor_id, f1.film_id AS film_id
+					FROM actor AS a1
+					INNER JOIN film_actor  AS f1
+					USING(actor_id)), -- > para poner varias CTEs una detrás de otra, hay que poner una coma entre las CTEs
+
+	actor2 AS (SELECT a2.actor_id AS actor_id, f2.film_id AS film_id
+					FROM actor AS a2
+					INNER JOIN film_actor  AS f2
+					USING(actor_id)) -- > OJO! aquí no hay coma porque se acaban los WITH
+
+SELECT actor1.actor_id AS actor_1, 
+		actor1.film_id AS peli_id,
+        actor2.actor_id AS actor_2
+	FROM actor1 
+	INNER JOIN actor2
+	USING(film_id)
+WHERE actor1.actor_id <> actor2.actor_id;
+
 
