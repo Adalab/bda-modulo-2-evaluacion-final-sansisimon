@@ -9,9 +9,25 @@ El archivo `evaluacion-final.sql` contiene una serie de pruebas por parte del pr
 
 
 ## Prueba:
-La prueba consiste en obtener la información pedida sobre de la base de datos de `Sakila`. A continuación se muestran algunos de los ejemplos de información requerida durante la prueba:
+La prueba consiste en obtener la información pedida sobre de la base de datos de `Sakila`. A continuación se un ejemplo de información requerida durante la prueba:
 
-### ejemplo 1
+### Ejemplo: 
+Encuentra el título de todas las películas que fueron alquiladas por más de 5 días:
+
+```sql
+SELECT DISTINCT f.title
+	FROM film AS f
+	INNER JOIN inventory AS i
+	USING(film_id)
+	INNER JOIN rental
+	USING(inventory_id)
+WHERE rental_id IN (SELECT  rental_id
+					FROM rental
+					WHERE (DATE(return_date) - DATE(rental_date)) > 5)
+```
+Esta consulta nos devuelve una tabla cuyo comienzo es de la siguiente forma:
+
+![alt text](image.png)
 
 
 ## Next steps:
