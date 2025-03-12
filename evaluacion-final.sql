@@ -1,17 +1,20 @@
 USE `sakila`;
 
 -- 1.Selecciona todos los nombres de las películas sin que aparezcan duplicados.
-/* solución: la tabla de peliculas no tiene nombres de pelis con duplicados, porque todos los resultados a las query devuelven 
-	el msimo número de filas*/
+/* NOTA: la tabla de peliculas no tiene nombres de pelis con duplicados, porque todos los resultados 
+a las query devuelven el mismo número de filas*/
+-- COMPROBACIONES:
 SELECT title
-FROM film; -- 1000 rows
-
-SELECT DISTINCT title
 FROM film; -- 1000 rows
 
 SELECT title
 FROM film
 GROUP BY title; -- 1000 rows
+
+/* solución: */
+SELECT DISTINCT title
+FROM film; -- 1000 rows
+
 
 -- **********************************************************************************************************************************
 -- 2. muestra los nombres de todas las películas que tengan una clasificación de "PG-13"
@@ -197,7 +200,7 @@ WHERE film_id = '458'; -- 10 rows
 
 -- **********************************************************************************************************************************
 -- 14. Muestra el título de todas las películas que contengan la palabra "dog" o "cat" en su descripción
-SELECT title, description
+SELECT title
 FROM film
 WHERE description LIKE '%dog%' OR 
 		description LIKE '%cat%'; -- 167 rows
@@ -560,7 +563,7 @@ pelis_coincidentes AS (SELECT id_1, COUNT(peli_id) AS coincidencias, id_2
 							FROM correlaciones
 							GROUP BY  id_1, id_2)
 
-SELECT p.id_1, act_1.first_name, act_1.last_name, p.coincidencias, p.id_2, act_2.first_name, act_2.last_name
+SELECT act_1.first_name, act_1.last_name, p.coincidencias, act_2.first_name, act_2.last_name
 	FROM pelis_coincidentes AS p
 	INNER JOIN actor AS act_1 -- > tabla actores original, no se puede usar la CTE de actor1
 	ON p.id_1 = act_1.actor_id

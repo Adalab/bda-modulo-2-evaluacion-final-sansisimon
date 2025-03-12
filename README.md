@@ -1,11 +1,10 @@
 # Evaluación módulo 2 (SQL)
 
-## Objetivo de la evaluación
+## Objetivo 
 El archivo `evaluacion-final.sql` contiene una serie de pruebas por parte del profesorado de `Adalab` para evaluar los conocimientos una vez finalizado el `módulo 2` del Bootcamp de Data Analytics.
 
 ## Aspectos formales
 - El archivo tiene extensión `.sql` 
-
 - La base de datos utilizada es `Sakila`, una base de datos que simula una tienda de alquiler de películas.
 
 
