@@ -448,46 +448,123 @@ WHERE c.name = 'comedy'
 -- **********************************************************************************************************************************
 -- 25.Encuentra todos los actores que han actuado juntos en al menos una película. La consulta debe mostrar el nombre 
 -- y apellido de los actores y el número de películas en las que han actuado juntos
+
 /* ---------------------
 sucio ejercicio 25:
 ----------------------*/
 
--- 1. Tabla de todos los actores que tienen en común una peli con otro actor:
-WITH actor1 AS (SELECT a1.actor_id AS actor_id, a1.first_name, a1.last_name, f1.film_id AS film_id
+/* ⚠️ IMPORTANTE: Cuando se define una CTE con WITH, su alcance es exclusivamente dentro de la consulta inmediatamente siguiente, 
+por ejemplo, actor1 y actor2, sólo pueden ser utilizadas dentro de la consulta que sigue a WITH y no persisten después de que 
+esa consulta se ejecuta.*/
+
+-- PASO 1.Elaboro tabla de todos los actores que tienen en común una peli con otro actor (correlaciones):
+WITH actor1 AS (SELECT a1.actor_id AS actor_id1, f1.film_id AS film_id
 					FROM actor AS a1
 					INNER JOIN film_actor  AS f1
 					USING(actor_id)), -- > para poner varias CTEs una detrás de otra, hay que poner una coma entre las CTEs
 
-	actor2 AS (SELECT a2.actor_id AS actor_id, a2.first_name, a2.last_name, f2.film_id AS film_id
+	actor2 AS (SELECT a2.actor_id AS actor_id2, f2.film_id AS film_id
 					FROM actor AS a2
 					INNER JOIN film_actor  AS f2
 					USING(actor_id)) -- > OJO! aquí no hay coma porque se acaban los WITH
 
-SELECT actor1.actor_id AS actor_1, 
+SELECT actor1.actor_id1 AS id_1, 
 		actor1.film_id AS peli_id,
-        actor2.actor_id AS actor_2
+        actor2.actor_id2 AS id_2
 	FROM actor1 
 	INNER JOIN actor2
 	USING(film_id)
-WHERE actor1.actor_id <> actor2.actor_id;
+WHERE actor1.actor_id1 <> actor2.actor_id2;
 -- -----------------------------------------------------
--- 2. Con la misma tabla del punto (1), cuento el num de pelis que han hecho juntos un actor y otro:
-WITH actor1 AS (SELECT a1.actor_id AS actor_id, f1.film_id AS film_id
-					FROM actor AS a1
-					INNER JOIN film_actor  AS f1
-					USING(actor_id)), -- > para poner varias CTEs una detrás de otra, hay que poner una coma entre las CTEs
+-- PASO 2. Con las correlaciones del punto (1), cuento las coincidencias entre los actores (añado otra CTE más):
+WITH 
+actor1 AS (SELECT a1.actor_id AS actor_id1, f1.film_id AS film_id
+				FROM actor AS a1
+				INNER JOIN film_actor  AS f1
+				USING(actor_id)), 
 
-	actor2 AS (SELECT a2.actor_id AS actor_id, f2.film_id AS film_id
-					FROM actor AS a2
-					INNER JOIN film_actor  AS f2
-					USING(actor_id)) -- > OJO! aquí no hay coma porque se acaban los WITH
+actor2 AS (SELECT a2.actor_id AS actor_id2, f2.film_id AS film_id
+				FROM actor AS a2
+				INNER JOIN film_actor  AS f2
+				USING(actor_id)),-- > Añadimos otra coma porque hacemos otro WITH
 
-SELECT actor1.actor_id AS actor_1, 
-		actor1.film_id AS peli_id,
-        actor2.actor_id AS actor_2
-	FROM actor1 
-	INNER JOIN actor2
-	USING(film_id)
-WHERE actor1.actor_id <> actor2.actor_id;
+correlaciones AS (SELECT actor1.actor_id1 AS id_1, 
+						actor1.film_id AS peli_id,
+						actor2.actor_id2 AS id_2
+							FROM actor1 
+							INNER JOIN actor2
+							USING(film_id)
+						WHERE actor1.actor_id1 <> actor2.actor_id2)  -- > sin coma porque se acaban los WITH
 
+SELECT id_1, COUNT(peli_id) AS coincidencias, id_2
+FROM correlaciones
+GROUP BY  id_1, id_2;
 
+-- -----------------------------------------------------
+-- PASO 3. Con las coincidencias del punto (2), añado los nombres (con otra CTE más):
+WITH 
+actor1 AS (SELECT a1.actor_id AS actor_id1, f1.film_id AS film_id
+				FROM actor AS a1
+				INNER JOIN film_actor  AS f1
+				USING(actor_id)), 
+
+actor2 AS (SELECT a2.actor_id AS actor_id2, f2.film_id AS film_id
+				FROM actor AS a2
+				INNER JOIN film_actor  AS f2
+				USING(actor_id)),
+
+correlaciones AS (SELECT actor1.actor_id1 AS id_1, 
+						actor1.film_id AS peli_id,
+						actor2.actor_id2 AS id_2
+							FROM actor1 
+							INNER JOIN actor2
+							USING(film_id)
+						WHERE actor1.actor_id1 <> actor2.actor_id2),  -- > Añadimos otra coma porque hacemos otro WITH
+
+pelis_coincidentes AS (SELECT id_1, COUNT(peli_id) AS coincidencias, id_2
+							FROM correlaciones
+							GROUP BY  id_1, id_2)
+
+SELECT p.id_1, act_1.first_name, act_1.last_name, p.coincidencias, p.id_2, act_2.first_name, act_2.last_name
+	FROM pelis_coincidentes AS p
+	INNER JOIN actor AS act_1 -- > tabla actores original, no se puede usar la CTE de actor1
+	ON p.id_1 = act_1.actor_id
+	INNER JOIN actor AS act_2 -- > tabla actores original, no se puede usar la CTE de actor2
+	ON p.id_2 = act_2.actor_id
+WHERE p.id_1 >  p.id_2 -- > para eliminar falsos "duplicados". Paso de tener 20.868 a 10.434 rows (justo la mitad)
+ORDER BY p.coincidencias DESC, p.id_1, p.id_2;
+
+/* ---------------------
+solución ejercicio 25: ejercicio final (igual que paso 3)
+----------------------*/
+WITH 
+actor1 AS (SELECT a1.actor_id AS actor_id1, f1.film_id AS film_id
+				FROM actor AS a1
+				INNER JOIN film_actor  AS f1
+				USING(actor_id)), 
+
+actor2 AS (SELECT a2.actor_id AS actor_id2, f2.film_id AS film_id
+				FROM actor AS a2
+				INNER JOIN film_actor  AS f2
+				USING(actor_id)),
+
+correlaciones AS (SELECT actor1.actor_id1 AS id_1, 
+						actor1.film_id AS peli_id,
+						actor2.actor_id2 AS id_2
+							FROM actor1 
+							INNER JOIN actor2
+							USING(film_id)
+						WHERE actor1.actor_id1 <> actor2.actor_id2),  -- > Añadimos otra coma porque hacemos otro WITH
+
+pelis_coincidentes AS (SELECT id_1, COUNT(peli_id) AS coincidencias, id_2
+							FROM correlaciones
+							GROUP BY  id_1, id_2)
+
+SELECT p.id_1, act_1.first_name, act_1.last_name, p.coincidencias, p.id_2, act_2.first_name, act_2.last_name
+	FROM pelis_coincidentes AS p
+	INNER JOIN actor AS act_1 -- > tabla actores original, no se puede usar la CTE de actor1
+	ON p.id_1 = act_1.actor_id
+	INNER JOIN actor AS act_2 -- > tabla actores original, no se puede usar la CTE de actor2
+	ON p.id_2 = act_2.actor_id
+WHERE p.id_1 >  p.id_2 -- > para eliminar falsos "duplicados". Paso de tener 20.868 a 10.434 rows (justo la mitad)
+ORDER BY p.coincidencias DESC, p.id_1, p.id_2;
