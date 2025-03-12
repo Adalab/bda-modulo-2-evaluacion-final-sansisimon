@@ -224,15 +224,20 @@ Solución pregunta 15:
 SELECT a.first_name, a.last_name
 	FROM actor AS a
     WHERE a.actor_id NOT IN (SELECT actor_id
-				FROM film_actor AS fa); -- lista de IDs de actores dentro de la tabla film_actor
+								FROM film_actor AS fa); -- lista de IDs de actores dentro de la tabla film_actor
 
 
 -- **********************************************************************************************************************************
 -- 16. Encuentra el título de todas las películas que fueron lanzadas entre el año 2005 y 2010.
+-- solución:
+SELECT title
+FROM film
+WHERE release_year BETWEEN 2005 AND 2010; 
+
+-- comprobación:
 SELECT title, release_year
 FROM film
-WHERE release_year BETWEEN 2005 AND 2010; -- Parece que todas las pelis fueron lanzadas en 2006
-
+WHERE release_year BETWEEN 2005 AND 2010;-- Parece que todas las pelis fueron lanzadas en 2006 (1.000 rows)
 
 -- **********************************************************************************************************************************
 -- 17. Encuentra el titulo de todas las películas que son de la misma categoría que "Family"
@@ -328,8 +333,8 @@ GROUP BY  a.actor_id
 HAVING COUNT(film_id) >= 5
 ORDER BY cantidad_pelis DESC; -- 200 rows, 
 
-/* NOTA: actor_id Susan Davis: 101 y 110. Entendemos que son dos personas diferentes porque cada una tiene sus películas.
-Por eso agrupo por actor_id y no por CONCAT(a.first_name, ' ', a.last_name) AS nombre_actor , porque si no me cuenta 
+/* NOTA: Tenemos dos actor_id para el nombre Susan Davis: 101 y 110. Entendemos que son dos personas diferentes porque cada una tiene 
+sus películas. Por eso agrupo por actor_id y no por CONCAT(a.first_name, ' ', a.last_name) AS nombre_actor , porque si no me cuenta 
 las pelis de las dos Susan Davis en la misma fila*/
 
 
@@ -435,10 +440,19 @@ FROM film_category; -- film_id, category_id
 SELECT *
 FROM category; -- category_id
 
+SELECT f.title, c.name, f.length
+	FROM film AS f
+	INNER JOIN film_category AS fc
+	USING(film_id)
+	INNER JOIN category AS c
+	USING(category_id)
+WHERE c.name = 'comedy'
+		AND f.length > 180; -- 3 rows
+        
 /* ---------------------
 solución ejercicio 24:
 ----------------------*/
-SELECT f.title, c.name, f.length
+SELECT f.title
 	FROM film AS f
 	INNER JOIN film_category AS fc
 	USING(film_id)
@@ -456,7 +470,7 @@ WHERE c.name = 'comedy'
 sucio ejercicio 25:
 ----------------------*/
 
-/* ⚠️ IMPORTANTE: Cuando se define una CTE con WITH, su alcance es exclusivamente dentro de la consulta inmediatamente siguiente, 
+/* IMPORTANTE: Cuando se define una CTE con WITH, su alcance es exclusivamente dentro de la consulta inmediatamente siguiente, 
 por ejemplo, actor1 y actor2, sólo pueden ser utilizadas dentro de la consulta que sigue a WITH y no persisten después de que 
 esa consulta se ejecuta.*/
 
@@ -538,7 +552,7 @@ WHERE p.id_1 >  p.id_2 -- > para eliminar falsos "duplicados". Paso de tener 20.
 ORDER BY p.coincidencias DESC, p.id_1, p.id_2;
 
 /* ---------------------
-solución ejercicio 25: ejercicio final (igual que paso 3)
+solución ejercicio 25: ejercicio final (igual que el Paso 3 pero ajustando el SELECT)
 ----------------------*/
 WITH 
 actor1 AS (SELECT a1.actor_id AS actor_id1, f1.film_id AS film_id
